@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context.xsd
+	http://www.springframework.org/schema/aop
+	http://www.springframework.org/schema/aop/spring-aop.xsd
+	http://www.springframework.org/schema/tx
+	http://www.springframework.org/schema/tx/spring-tx.xsd">
+    <!--开启包扫描-->
+    <context:component-scan base-package="com.itheima">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"></context:exclude-filter>
+    </context:component-scan>
+    <!--开启注解支持-->
+    <context:annotation-config></context:annotation-config>
+
+
+    <bean id="itemsServiceImpl" class="com.itheima.service.impl.ItemsServiceImpl"></bean>
+
+    <import resource="classpath:applicationContext-dao.xml"></import>
+
+    <!--配置申明式事务-->
+    <!--5.配置声明式事务-->
+    <!--5.1事务管理器-->
+    <bean id="dataSourceTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    <!--5.2配置通知-->
+    <tx:advice transaction-manager="dataSourceTransactionManager" id="tx">
+        <tx:attributes>
+            <tx:method name="*" read-only="false"  propagation="REQUIRED"></tx:method>
+            <tx:method name="find*" read-only="true" propagation="SUPPORTS"></tx:method>
+        </tx:attributes>
+    </tx:advice>
+    <!--5.3配置切面-->
+    <aop:config>
+        <!--配置切点-->
+        <aop:pointcut id="servicePointcut" expression="execution(* com.itheima.service.impl.*.*(..))"></aop:pointcut>
+        <!--配置通知-->
+        <aop:advisor advice-ref="tx" pointcut-ref="servicePointcut"></aop:advisor>
+    </aop:config>
+
+</beans>
